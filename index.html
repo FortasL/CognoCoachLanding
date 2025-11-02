@@ -77,5 +77,38 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <small>CognoCoach 2025 — Tous droits réservés.</small>
     </div>
   </footer>
+  <script>
+    // 1) Sélectionne spécifiquement ce bouton :
+    //    - priorise l'ancre .btn contenant le texte "Réserver un appel"
+    //    - fallback : la première .btn dans .container.center
+    function findCta() {
+      const candidates = Array.from(document.querySelectorAll('.container.center a.btn'));
+      // Trouve par texte (tolérant aux espaces / retours ligne)
+      const byText = candidates.find(a => /réserver un appel/i.test(a.textContent || ''));
+      return byText || candidates[0] || null;
+    }
+  
+    const cta = findCta();
+  
+    if (cta) {
+      cta.addEventListener('click', function () {
+        // 2) Envoie l'événement à GA4
+        //    (aucun délai nécessaire: target="_blank")
+        if (typeof gtag === 'function') {
+          gtag('event', 'cta_reservation_click', {
+            event_category: 'CTA',
+            event_label: (cta.getAttribute('href') || 'href_vide'),
+            link_text: (cta.textContent || '').trim(),
+            value: 1
+          });
+          console.log('📈 GA4 event envoyé: cta_reservation_click');
+        } else {
+          console.warn('GA4 non initialisé: gtag() introuvable');
+        }
+      }, { passive: true });
+    } else {
+      console.warn('CTA non trouvé: vérifie le sélecteur .container.center a.btn');
+    }
+  </script>
 </body>
 </html>
